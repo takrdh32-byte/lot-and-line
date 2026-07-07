@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lot & Line — Bank Auction Vehicles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#122036;
+    --navy-deep:#0B1626;
+    --paper:#EAEEEF;
+    --paper-dim:#DCE2E3;
+    --gold:#C89B3C;
+    --gold-deep:#A87F2A;
+    --green:#2F6F4E;
+    --red:#B33A3A;
+    --ink:#16202B;
+    --ink-soft:#4C5A66;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    padding-bottom:48px;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    background:var(--navy);
+    padding:22px 20px 26px;
+    position:relative;
+    overflow:hidden;
+  }
+  header::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:radial-gradient(circle at 90% -10%, rgba(200,155,60,0.18), transparent 55%);
+  }
+  .brandrow{display:flex;align-items:center;position:relative;z-index:1;}
+  .brandleft{display:flex;align-items:center;gap:10px;}
+  .seal{
+    width:34px;height:34px;border-radius:50%;
+    border:1.5px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Mono',monospace;font-size:13px;color:var(--gold);
+    flex-shrink:0;
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:23px;
+    color:#F3EFE3;
+    letter-spacing:0.2px;
+    display:flex;align-items:center;gap:6px;
+  }
+  .verified-tick{width:18px;height:18px;flex-shrink:0;}
+
+  header p.tag{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    color:#9FB0BE;
+    margin-top:6px;
+    letter-spacing:0.6px;
+    text-transform:uppercase;
+    position:relative;z-index:1;
+  }
+
+  /* ---------- Spinning 3D authenticity coin ---------- */
+  .toy-outer{
+    position:absolute;top:12px;right:16px;z-index:2;
+    width:58px;height:58px;
+    animation:coinFloat 3.2s ease-in-out infinite;
+  }
+  .toy-outer::before{
+    content:"";position:absolute;left:50%;bottom:-16px;width:34px;height:8px;
+    transform:translateX(-50%);border-radius:50%;
+    background:radial-gradient(closest-side, rgba(0,0,0,0.35), transparent 75%);
+    animation:shadowPulse 3.2s ease-in-out infinite;
+  }
+  .toy-coin{
+    width:100%;height:100%;position:relative;
+    perspective:800px;
+  }
+  .toy-coin-inner{
+    width:100%;height:100%;position:relative;
+    transform-style:preserve-3d;
+    animation:coinFlip 4.5s cubic-bezier(.7,0,.3,1) infinite;
+  }
+  .coin-face{
+    position:absolute;inset:0;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    backface-visibility:hidden;
+    box-shadow:0 0 0 2px rgba(255,255,255,0.15) inset, 0 6px 14px rgba(0,0,0,0.4);
+  }
+  .coin-face.front{
+    background:radial-gradient(circle at 32% 26%, #FBF3DE 0%, var(--gold) 55%, var(--gold-deep) 100%);
+    border:2px solid #8E6A1E;
+  }
+  .coin-face.back{
+    background:radial-gradient(circle at 32% 26%, #24344B 0%, var(--navy) 60%, var(--navy-deep) 100%);
+    border:2px solid var(--gold);
+    transform:rotateY(180deg);
+  }
+  .coin-face svg{width:26px;height:26px;position:relative;z-index:1;}
+  .coin-face .monogram{
+    font-family:'Fraunces',serif;font-weight:700;font-size:15px;color:var(--gold);
+    letter-spacing:0.5px;position:relative;z-index:1;
+  }
+  .coin-ring{
+    position:absolute;inset:4px;border-radius:50%;
+    border:1px dashed rgba(255,255,255,0.35);pointer-events:none;
+  }
+  .coin-face .shine{
+    position:absolute;top:3px;left:9px;width:18px;height:10px;border-radius:50%;
+    background:rgba(255,255,255,0.5);filter:blur(1.5px);pointer-events:none;
+  }
+  @keyframes coinFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+  @keyframes shadowPulse{0%,100%{opacity:0.55;transform:translateX(-50%) scale(1);}50%{opacity:0.3;transform:translateX(-50%) scale(0.8);}}
+  @keyframes coinFlip{
+    0%{transform:rotateY(0deg);}
+    38%{transform:rotateY(180deg);}
+    50%{transform:rotateY(180deg);}
+    88%{transform:rotateY(360deg);}
+    100%{transform:rotateY(360deg);}
+  }
+
+  /* ---------- Filter pills ---------- */
+  .filters{
+    display:flex;gap:8px;padding:16px 16px 4px;
+    overflow-x:auto;
+    max-width:640px;margin:0 auto;
+  }
+  .filters::-webkit-scrollbar{display:none;}
+  .pill{
+    font-family:'Inter',sans-serif;
+    font-size:13px;font-weight:600;
+    padding:8px 16px;border-radius:20px;
+    border:1px solid var(--paper-dim);
+    background:#fff;color:var(--ink-soft);
+    white-space:nowrap;cursor:pointer;
+    transition:all .15s ease;
+  }
+  .pill.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+  /* ---------- Grid ---------- */
+  .grid{padding:14px 16px 10px;display:grid;gap:16px;max-width:640px;margin:0 auto;}
+
+  /* ---------- Ticket card ---------- */
+  .ticket{
+    background:#fff;border-radius:14px;position:relative;
+    box-shadow:0 1px 2px rgba(18,32,54,0.06), 0 8px 20px -12px rgba(18,32,54,0.25);
+    overflow:hidden;animation:rise .5s ease both;cursor:pointer;
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+  .ticket-top{display:flex;align-items:flex-start;justify-content:space-between;padding:14px 16px 0;}
+  .lot-id{font-family:'Space Mono',monospace;font-size:11px;color:var(--ink-soft);letter-spacing:1px;}
+  .stamp{
+    font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;
+    border:1.4px solid currentColor;border-radius:8px;padding:4px 8px;
+    transform:rotate(3deg);letter-spacing:0.4px;
+    animation:stampin .4s .15s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  @keyframes stampin{from{opacity:0;transform:rotate(3deg) scale(0.6);}to{opacity:1;transform:rotate(3deg) scale(1);}}
+  .stamp.urgent{color:var(--red);}
+  .stamp.soon{color:var(--gold-deep);}
+  .stamp.open{color:var(--green);}
+
+  .ticket-body{display:flex;gap:14px;padding:12px 16px 14px;}
+  .icon-wrap{
+    width:64px;height:64px;border-radius:12px;background:var(--navy);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    overflow:hidden;
+  }
+  .icon-wrap svg{width:34px;height:34px;}
+  .icon-wrap img{width:100%;height:100%;object-fit:cover;}
+  .info{flex:1;min-width:0;}
+  .info h3{font-family:'Fraunces',serif;font-weight:600;font-size:16.5px;line-height:1.25;margin-bottom:4px;}
+  .bank-loc{font-size:12.5px;color:var(--ink-soft);margin-bottom:8px;}
+  .bank-loc b{color:var(--ink);}
+  .price-row{display:flex;align-items:baseline;gap:6px;margin-bottom:2px;}
+  .price{font-family:'Space Mono',monospace;font-size:19px;font-weight:700;color:var(--navy);}
+  .price-label{font-size:11px;color:var(--ink-soft);}
+
+  .date-line{font-size:11.5px;color:var(--ink-soft);padding:0 16px 12px;margin-top:-4px;}
+  .empty{text-align:center;color:var(--ink-soft);padding:60px 24px;font-size:14px;}
+  footer.note{text-align:center;font-size:11px;color:var(--ink-soft);padding:20px;font-family:'Space Mono',monospace;}
+
+  /* ---------- Full-screen Detail ---------- */
+  .detail-screen{
+    position:fixed;inset:0;background:var(--paper);
+    transform:translateX(100%);transition:transform .3s ease;
+    z-index:50;overflow-y:auto;
+  }
+  .detail-screen.show{transform:translateX(0);}
+  .detail-hero{
+    background:var(--navy);padding:18px 16px 40px;position:relative;overflow:hidden;
+  }
+  .detail-hero::after{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 90% -10%, rgba(200,155,60,0.18), transparent 55%);}
+  .back-btn{
+    width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.1);
+    border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;
+    position:relative;z-index:1;
+  }
+  .back-btn svg{width:18px;height:18px;stroke:#F3EFE3;}
+  .detail-icon{
+    width:88px;height:88px;border-radius:18px;background:rgba(255,255,255,0.08);
+    display:flex;align-items:center;justify-content:center;margin:22px auto 0;
+    border:1px solid rgba(200,155,60,0.3);overflow:hidden;
+  }
+  .detail-icon svg{width:46px;height:46px;}
+  .detail-icon img{width:100%;height:100%;object-fit:cover;}
+
+  .photo-slider{position:relative;margin-top:18px;}
+  .photo-track{
+    display:flex;overflow-x:auto;scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;border-radius:0;
+  }
+  .photo-track::-webkit-scrollbar{display:none;}
+  .photo-track img{
+    width:100%;flex:0 0 100%;scroll-snap-align:center;
+    height:220px;object-fit:cover;
+  }
+  .photo-dots{display:flex;justify-content:center;gap:6px;margin-top:10px;}
+  .photo-dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.3);}
+  .photo-dots span.active{background:var(--gold);}
+  .detail-lot{
+    text-align:center;font-family:'Space Mono',monospace;color:var(--gold);
+    font-size:12px;letter-spacing:1.5px;margin-top:14px;position:relative;z-index:1;
+  }
+  .detail-title{
+    text-align:center;font-family:'Fraunces',serif;font-weight:700;
+    font-size:24px;color:#F3EFE3;margin-top:6px;padding:0 20px;position:relative;z-index:1;
+  }
+  .detail-stamp-row{display:flex;justify-content:center;margin-top:12px;position:relative;z-index:1;}
+
+  .detail-card{
+    background:#fff;margin:-22px 16px 16px;border-radius:16px;padding:20px;
+    box-shadow:0 8px 24px -14px rgba(18,32,54,0.3);position:relative;z-index:1;
+  }
+  .detail-price{font-family:'Space Mono',monospace;font-size:28px;font-weight:700;color:var(--navy);}
+  .detail-price-label{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .detail-divider{border-top:1px solid var(--paper-dim);margin:16px 0;}
+  .detail-row{display:flex;justify-content:space-between;padding:8px 0;font-size:14px;}
+  .detail-row span:first-child{color:var(--ink-soft);}
+  .detail-row span:last-child{font-weight:600;text-align:right;}
+  .detail-note{
+    background:var(--paper);border-radius:10px;padding:12px 14px;font-size:12.5px;
+    color:var(--ink-soft);margin-top:16px;line-height:1.6;
+  }
+  .detail-actions{display:flex;gap:10px;margin:0 16px 20px;}
+  .btn{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+    padding:11px;border-radius:9px;font-size:13.5px;font-weight:600;
+    border:none;cursor:pointer;text-decoration:none;
+  }
+  .btn.whatsapp{background:#25623F;color:#fff;}
+  .btn.call{background:var(--paper);color:var(--ink);border:1px solid var(--paper-dim);}
+  .detail-actions .btn{padding:14px;font-size:14.5px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brandrow">
+    <div class="brandleft">
+      <div class="seal">L&amp;L</div>
+      <h1>Lot &amp; Line
+        <svg class="verified-tick" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2l2.4 1.4 2.7-.4 1.4 2.4 2.4 1.4-.4 2.7 1.4 2.4-1.4 2.4.4 2.7-2.4 1.4-1.4 2.4-2.7-.4L12 22l-2.4-1.4-2.7.4-1.4-2.4-2.4-1.4.4-2.7L2 12l1.4-2.4-.4-2.7 2.4-1.4 1.4-2.4 2.7.4L12 2z" fill="#0095F6"/>
+          <path d="M8.5 12.3l2.3 2.3 4.7-4.9" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </h1>
+    </div>
+  </div>
+  <p class="tag">Bank-Seized Vehicle Auctions · Verified Listings</p>
+  <div class="toy-outer">
+    <div class="toy-coin">
+      <div class="toy-coin-inner">
+        <div class="coin-face front">
+          <div class="coin-ring"></div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#122036" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.5 3.5l6 6-2 2-6-6 2-2z"/>
+            <path d="M12.5 5.5l6 6"/>
+            <path d="M9 9l6 6-6.5 6.5a2.1 2.1 0 0 1-3-3L9 9z"/>
+            <path d="M3 21h7"/>
+          </svg>
+          <div class="shine"></div>
+        </div>
+        <div class="coin-face back">
+          <div class="coin-ring"></div>
+          <span class="monogram">L&amp;L</span>
+          <div class="shine"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="filters" id="filters"></div>
+<div class="grid" id="grid"></div>
+<footer class="note">LOT &amp; LINE — Demo data for interface preview</footer>
+
+<!-- ===== Full-screen Detail ===== -->
+<div class="detail-screen" id="detailScreen">
+  <div class="detail-hero">
+    <button class="back-btn" onclick="closeDetail()">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="detail-icon" id="detailIcon"></div>
+    <div class="photo-slider" id="photoSlider" style="display:none;">
+      <div class="photo-track" id="photoTrack"></div>
+      <div class="photo-dots" id="photoDots"></div>
+    </div>
+    <div class="detail-lot" id="detailLot"></div>
+    <div class="detail-title" id="detailTitle"></div>
+    <div class="detail-stamp-row"><span class="stamp" id="detailStamp"></span></div>
+  </div>
+  <div class="detail-card">
+    <div class="detail-price" id="detailPrice"></div>
+    <div class="detail-price-label">Reserve / opening bid price</div>
+    <div class="detail-divider"></div>
+    <div class="detail-row"><span>Bank</span><span id="detailBank"></span></div>
+    <div class="detail-row"><span>Location</span><span id="detailLocation"></span></div>
+    <div class="detail-row"><span>Auction Date</span><span id="detailDate"></span></div>
+    <div class="detail-row"><span>Vehicle Type</span><span id="detailType"></span></div>
+    <div class="detail-row"><span>Year</span><span id="detailYear"></span></div>
+    <div class="detail-row"><span>Model Number</span><span id="detailModel"></span></div>
+    <div class="detail-row"><span>Owner</span><span id="detailOwner"></span></div>
+    <div class="detail-row"><span>Registration No.</span><span id="detailRegNo"></span></div>
+    <div class="detail-row"><span>Fuel Type</span><span id="detailFuel"></span></div>
+    <div class="detail-row"><span>KM Driven</span><span id="detailKm"></span></div>
+    <div class="detail-row"><span>Engine No.</span><span id="detailEngine"></span></div>
+    <div class="detail-row"><span>Chassis No.</span><span id="detailChassis"></span></div>
+    <div class="detail-row"><span>Insurance Valid Till</span><span id="detailInsurance"></span></div>
+    <div class="detail-row"><span>RC / Documents</span><span id="detailDocs"></span></div>
+    <div class="detail-note">Ye jaankari sirf reference ke liye hai. Final bidding terms, EMD amount aur documents ke liye bank se seedha confirm karein.</div>
+  </div>
+  <div class="detail-actions">
+    <a class="btn whatsapp" id="detailWhatsapp" target="_blank">WhatsApp Karo</a>
+    <a class="btn call" id="detailCall">Call Karo</a>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* 👉 YAHAN APNA FIREBASE CONFIG PASTE KARO — admin.html mein jo config dala hai WAHI yahan bhi paste karna (same project) */
+const firebaseConfig = {
+  apiKey: "AIzaSyBXj3qHy45YD5UsxXxyyQhQcCSQGqge4yM",
+  authDomain: "challandetails-7e461.firebaseapp.com",
+  projectId: "challandetails-7e461",
+  storageBucket: "challandetails-7e461.firebasestorage.app",
+  messagingSenderId: "452642538357",
+  appId: "1:452642538357:web:43f9e7ceeee4ee4d94093c"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const TODAY = new Date();
+
+const ICONS = {
+  Car: `<svg viewBox="0 0 24 24" fill="none" stroke="#EAEEEF" stroke-width="1.6"><path d="M3 13l1.5-4.5A2 2 0 0 1 6.4 7h11.2a2 2 0 0 1 1.9 1.5L21 13"/><rect x="2.5" y="13" width="19" height="5" rx="1.5"/><circle cx="7" cy="18.5" r="1.6" fill="#EAEEEF" stroke="none"/><circle cx="17" cy="18.5" r="1.6" fill="#EAEEEF" stroke="none"/></svg>`,
+  Bike: `<svg viewBox="0 0 24 24" fill="none" stroke="#EAEEEF" stroke-width="1.6"><circle cx="5.5" cy="17.5" r="3.2"/><circle cx="18.5" cy="17.5" r="3.2"/><path d="M5.5 17.5l4-8h4l3 8M9.5 9.5h4M12 6.5h3.5l2 4"/></svg>`,
+  Scooter: `<svg viewBox="0 0 24 24" fill="none" stroke="#EAEEEF" stroke-width="1.6"><circle cx="5.5" cy="17.5" r="3"/><circle cx="17.5" cy="17.5" r="3"/><path d="M5.5 17.5h6l2-6h4M13.5 6h2.5v3M9 11.5h4"/></svg>`,
+  Commercial: `<svg viewBox="0 0 24 24" fill="none" stroke="#EAEEEF" stroke-width="1.6"><path d="M2.5 8.5h11v8h-11z"/><path d="M13.5 11h4l3 3v2.5h-7z"/><circle cx="6" cy="18.5" r="1.6" fill="#EAEEEF" stroke="none"/><circle cx="16.5" cy="18.5" r="1.6" fill="#EAEEEF" stroke="none"/></svg>`
+};
+
+let listings = []; // Firestore se real-time bhar jaayega, ab yahan koi fake data nahi
+let activeFilter = "All";
+const types = ["All","Car","Bike","Scooter","Commercial"];
+
+/* Firestore ke "listings" collection ko live sunna — admin panel jab data add/edit/delete karega, ye apne aap update ho jaayega */
+onSnapshot(query(collection(db, "listings"), orderBy("auctionDate")), snap => {
+  listings = snap.docs.map(d => d.data());
+  render();
+}, err => {
+  console.error("Firestore read error:", err);
+  document.getElementById('grid').innerHTML = `<div class="empty">Listings load nahi ho payi.<br>Firebase config check karo.</div>`;
+});
+
+function daysLeft(dateStr){
+  const target = new Date(dateStr);
+  return Math.ceil((target - TODAY) / (1000*60*60*24));
+}
+function stampFor(days){
+  if(days <= 2) return {cls:"urgent", text: days <= 0 ? "CLOSES TODAY" : days+" DAY"+(days>1?"S":"")+" LEFT"};
+  if(days <= 6) return {cls:"soon", text: days+" DAYS LEFT"};
+  return {cls:"open", text: days+" DAYS LEFT"};
+}
+
+function renderFilters(){
+  document.getElementById('filters').innerHTML = types.map(t =>
+    `<div class="pill ${t===activeFilter?'active':''}" onclick="setFilter('${t}')">${t}</div>`
+  ).join('');
+}
+function setFilter(t){ activeFilter = t; renderFilters(); render(); }
+
+function render(){
+  const grid = document.getElementById('grid');
+  const data = listings.filter(l => activeFilter==="All" || l.type===activeFilter);
+  if(data.length === 0){
+    grid.innerHTML = `<div class="empty">Is category mein abhi koi listing nahi.<br>Baad mein dobara check karo.</div>`;
+    return;
+  }
+  grid.innerHTML = data.map(item => {
+    const dl = daysLeft(item.auctionDate);
+    const stamp = stampFor(dl);
+    const dateFmt = new Date(item.auctionDate).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+    const thumb = (item.images && item.images.length) ? `<img src="${item.images[0]}">` : ICONS[item.type];
+    return `
+    <div class="ticket" onclick="openDetail('${item.id}')">
+      <div class="ticket-top">
+        <span class="lot-id">LOT #${item.id}</span>
+        <span class="stamp ${stamp.cls}">${stamp.text}</span>
+      </div>
+      <div class="ticket-body">
+        <div class="icon-wrap">${thumb}</div>
+        <div class="info">
+          <h3>${item.name} · ${item.year}</h3>
+          <div class="bank-loc"><b>${item.bank}</b> &nbsp;·&nbsp; ${item.location}</div>
+          <div class="price-row">
+            <span class="price">₹${Number(item.price).toLocaleString('en-IN')}</span>
+            <span class="price-label">reserve price</span>
+          </div>
+        </div>
+      </div>
+      <div class="date-line">📅 Auction date: ${dateFmt}</div>
+    </div>`;
+  }).join('');
+}
+
+function openDetail(id){
+  const item = listings.find(l => l.id === id);
+  if(!item) return;
+  const dl = daysLeft(item.auctionDate);
+  const stamp = stampFor(dl);
+  const dateFmt = new Date(item.auctionDate).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+
+  const slider = document.getElementById('photoSlider');
+  const detailIcon = document.getElementById('detailIcon');
+  if(item.images && item.images.length){
+    detailIcon.style.display = 'none';
+    slider.style.display = 'block';
+    document.getElementById('photoTrack').innerHTML = item.images.map(src => `<img src="${src}">`).join('');
+    document.getElementById('photoDots').innerHTML = item.images.map((_, i) => `<span class="${i===0?'active':''}"></span>`).join('');
+    const track = document.getElementById('photoTrack');
+    track.onscroll = () => {
+      const idx = Math.round(track.scrollLeft / track.clientWidth);
+      document.querySelectorAll('#photoDots span').forEach((d,i) => d.classList.toggle('active', i===idx));
+    };
+  } else {
+    slider.style.display = 'none';
+    detailIcon.style.display = 'flex';
+    detailIcon.innerHTML = ICONS[item.type].replace(/width="34" height="34"/,'width="46" height="46"');
+  }
+
+  document.getElementById('detailLot').textContent = "LOT #" + item.id;
+  document.getElementById('detailTitle').textContent = item.name;
+  document.getElementById('detailStamp').className = "stamp " + stamp.cls;
+  document.getElementById('detailStamp').textContent = stamp.text;
+  document.getElementById('detailPrice').textContent = "₹" + Number(item.price).toLocaleString('en-IN');
+  document.getElementById('detailBank').textContent = item.bank;
+  document.getElementById('detailLocation').textContent = item.location;
+  document.getElementById('detailDate').textContent = dateFmt;
+  document.getElementById('detailType').textContent = item.type;
+  document.getElementById('detailYear').textContent = item.year;
+  document.getElementById('detailModel').textContent = item.modelNumber || '—';
+  document.getElementById('detailOwner').textContent = item.owner || '—';
+  document.getElementById('detailRegNo').textContent = item.regNo || '—';
+  document.getElementById('detailFuel').textContent = item.fuelType || '—';
+  document.getElementById('detailKm').textContent = item.kmDriven ? Number(item.kmDriven).toLocaleString('en-IN') + ' km' : '—';
+  document.getElementById('detailEngine').textContent = item.engineNo || '—';
+  document.getElementById('detailChassis').textContent = item.chassisNo || '—';
+  document.getElementById('detailInsurance').textContent = item.insuranceValid
+    ? new Date(item.insuranceValid).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})
+    : '—';
+  document.getElementById('detailDocs').textContent = item.docs || '—';
+
+  const wa = document.getElementById('detailWhatsapp');
+  wa.href = `https://wa.me/${item.phone}?text=${encodeURIComponent('Hi, mujhe LOT #'+item.id+' ('+item.name+') ke baare mein jaankari chahiye')}`;
+  document.getElementById('detailCall').href = `tel:+${item.phone}`;
+
+  document.getElementById('detailScreen').classList.add('show');
+}
+function closeDetail(){ document.getElementById('detailScreen').classList.remove('show'); }
+
+renderFilters();
+render();
+
+/* Module script ke andar declare functions default globally accessible nahi hote — inline onclick ke liye window par expose karna zaroori hai */
+window.setFilter = setFilter;
+window.openDetail = openDetail;
+window.closeDetail = closeDetail;
+</script>
+</body>
+</html>

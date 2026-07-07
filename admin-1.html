@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lot & Line — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#122036;
+    --navy-deep:#0B1626;
+    --paper:#EAEEEF;
+    --paper-dim:#DCE2E3;
+    --gold:#C89B3C;
+    --gold-deep:#A87F2A;
+    --green:#2F6F4E;
+    --green-bg:#E7F1EC;
+    --red:#B33A3A;
+    --red-bg:#F7EAEA;
+    --ink:#16202B;
+    --ink-soft:#5B6774;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--navy-deep);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- LOGIN SCREEN ---------- */
+  #loginScreen{
+    min-height:100vh;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:32px 24px;
+    background:var(--navy-deep);
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(200,155,60,0.10), transparent 45%),
+      radial-gradient(circle at 85% 80%, rgba(200,155,60,0.08), transparent 45%);
+  }
+  .login-seal{
+    width:64px;height:64px;border-radius:50%;
+    border:1.5px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Mono',monospace;font-size:22px;color:var(--gold);
+    margin-bottom:22px;
+  }
+  .login-title{
+    font-family:'Fraunces',serif;font-weight:700;font-size:26px;
+    color:#F3EFE3;text-align:center;
+  }
+  .login-sub{
+    font-family:'Space Mono',monospace;font-size:11px;color:#8496A4;
+    letter-spacing:1.2px;text-transform:uppercase;margin-top:8px;text-align:center;
+  }
+  .login-box{width:100%;max-width:340px;margin-top:36px;}
+  .login-box label{
+    font-size:12px;color:#8496A4;display:block;margin-bottom:6px;
+    font-family:'Space Mono',monospace;letter-spacing:0.5px;
+  }
+  .login-box input{
+    width:100%;padding:14px 16px;border-radius:10px;
+    border:1px solid rgba(255,255,255,0.12);
+    background:rgba(255,255,255,0.05);color:#F3EFE3;
+    font-size:15px;font-family:'Inter',sans-serif;
+  }
+  .login-box input::placeholder{color:#5B6774;}
+  .login-btn{
+    width:100%;margin-top:16px;padding:14px;border:none;border-radius:10px;
+    background:var(--gold);color:var(--navy-deep);font-weight:700;font-size:15px;cursor:pointer;
+  }
+  .login-error{
+    color:#E08787;font-size:12.5px;margin-top:10px;text-align:center;display:none;
+  }
+
+  /* ---------- DASHBOARD ---------- */
+  #dashboard{display:none;min-height:100vh;background:var(--paper);}
+  .dash-header{
+    background:var(--navy);padding:20px 18px 22px;position:relative;overflow:hidden;
+  }
+  .dash-header::after{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 90% -10%, rgba(200,155,60,0.16), transparent 55%);}
+  .dash-top{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;}
+  .dash-brand{display:flex;align-items:center;gap:10px;}
+  .dash-brand .seal{
+    width:32px;height:32px;border-radius:50%;border:1.5px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Mono',monospace;font-size:12px;color:var(--gold);
+  }
+  .dash-brand h1{font-family:'Fraunces',serif;font-weight:700;font-size:19px;color:#F3EFE3;}
+  .dash-brand span{font-family:'Space Mono',monospace;font-size:9.5px;color:var(--gold);letter-spacing:1px;}
+  .logout-btn{
+    background:rgba(255,255,255,0.08);border:none;color:#C9D4DB;
+    padding:8px 14px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;
+  }
+
+  .stats-row{
+    display:flex;gap:10px;margin-top:18px;position:relative;z-index:1;
+  }
+  .stat-card{
+    flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);
+    border-radius:12px;padding:12px 14px;
+  }
+  .stat-num{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:#F3EFE3;}
+  .stat-label{font-size:10.5px;color:#9FB0BE;margin-top:2px;text-transform:uppercase;letter-spacing:0.4px;}
+
+  /* ---------- Content ---------- */
+  .dash-content{max-width:680px;margin:0 auto;padding:18px 16px 40px;}
+  .add-btn{
+    width:100%;background:var(--gold);color:var(--navy-deep);border:none;
+    padding:15px;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer;
+    margin-bottom:18px;display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .section-label{
+    font-family:'Space Mono',monospace;font-size:11px;color:var(--ink-soft);
+    letter-spacing:1px;text-transform:uppercase;margin:18px 0 10px;
+  }
+
+  .row-card{
+    background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;
+    display:flex;align-items:center;gap:12px;
+    box-shadow:0 1px 2px rgba(18,32,54,0.05);
+  }
+  .row-icon{
+    width:44px;height:44px;border-radius:10px;background:var(--navy);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .row-icon svg{width:24px;height:24px;}
+  .row-info{flex:1;min-width:0;}
+  .row-title{font-weight:700;font-size:14.5px;}
+  .row-sub{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .row-badge{
+    font-family:'Space Mono',monospace;font-size:10px;font-weight:700;
+    padding:3px 8px;border-radius:6px;margin-top:6px;display:inline-block;
+  }
+  .row-badge.urgent{background:var(--red-bg);color:var(--red);}
+  .row-badge.soon{background:#FBF1DE;color:var(--gold-deep);}
+  .row-badge.open{background:var(--green-bg);color:var(--green);}
+  .row-actions{display:flex;flex-direction:column;gap:6px;}
+  .icon-btn{
+    width:34px;height:34px;border-radius:9px;border:none;display:flex;
+    align-items:center;justify-content:center;cursor:pointer;font-size:15px;
+  }
+  .icon-btn.edit{background:var(--green-bg);color:var(--green);}
+  .icon-btn.del{background:var(--red-bg);color:var(--red);}
+  .empty-state{
+    text-align:center;color:var(--ink-soft);padding:50px 20px;font-size:13.5px;
+    background:#fff;border-radius:12px;
+  }
+
+  /* ---------- Modal (Add/Edit) ---------- */
+  .modal-bg{
+    display:none;position:fixed;inset:0;background:rgba(11,22,38,0.6);
+    z-index:100;align-items:flex-end;justify-content:center;
+  }
+  .modal-bg.show{display:flex;}
+  .modal{
+    background:#fff;width:100%;max-width:640px;border-radius:18px 18px 0 0;
+    padding:22px 20px 26px;max-height:88vh;overflow-y:auto;
+  }
+  .modal h2{font-family:'Fraunces',serif;font-size:19px;margin-bottom:16px;}
+  .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .modal label{font-size:12px;color:var(--ink-soft);display:block;margin-top:12px;margin-bottom:5px;font-weight:600;}
+  .modal input,.modal select{
+    width:100%;padding:11px 12px;border:1px solid var(--paper-dim);border-radius:9px;
+    font-size:14px;font-family:'Inter',sans-serif;
+  }
+  .modal-actions{display:flex;gap:10px;margin-top:20px;}
+  .modal-actions button{flex:1;padding:13px;border:none;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;}
+  .save-btn{background:var(--navy);color:#fff;}
+  .cancel-btn{background:var(--paper);color:var(--ink);}
+  .img-thumb{
+    position:relative;width:70px;height:70px;border-radius:9px;overflow:hidden;
+    border:1px solid var(--paper-dim);
+  }
+  .img-thumb img{width:100%;height:100%;object-fit:cover;}
+  .img-thumb .rm{
+    position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;
+    background:rgba(179,58,58,0.9);color:#fff;border:none;font-size:11px;cursor:pointer;
+  }
+  .row-thumb{width:44px;height:44px;border-radius:10px;object-fit:cover;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="loginScreen">
+  <div class="login-seal">L&amp;L</div>
+  <div class="login-title">Admin Access</div>
+  <div class="login-sub">Lot &amp; Line · Internal Panel</div>
+  <div class="login-box">
+    <label>PASSWORD</label>
+    <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Enter Panel</button>
+    <div class="login-error" id="loginError">Galat password. Dobara try karo.</div>
+  </div>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div id="dashboard">
+  <div class="dash-header">
+    <div class="dash-top">
+      <div class="dash-brand">
+        <div class="seal">L&amp;L</div>
+        <div>
+          <h1>Admin Panel</h1>
+          <span>LOT &amp; LINE</span>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num" id="statTotal">0</div>
+        <div class="stat-label">Total Listings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statUrgent">0</div>
+        <div class="stat-label">Closing ≤2 Days</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-content">
+    <button class="add-btn" onclick="openForm()">+ Nayi Listing Add Karo</button>
+    <div class="section-label">Sabhi Listings</div>
+    <div id="rowList"></div>
+  </div>
+</div>
+
+<!-- ============ Add/Edit Modal ============ -->
+<div class="modal-bg" id="formModalBg">
+  <div class="modal">
+    <h2 id="formTitle">Nayi Listing</h2>
+    <label>Vehicle Type</label>
+    <select id="f_type">
+      <option>Car</option><option>Bike</option><option>Scooter</option><option>Commercial</option>
+    </select>
+    <label>Vehicle Naam / Model</label>
+    <input id="f_name" placeholder="Maruti Swift VDI">
+    <div class="field-grid">
+      <div><label>Year</label><input id="f_year" type="number" placeholder="2019"></div>
+      <div><label>Price (₹)</label><input id="f_price" type="number" placeholder="380000"></div>
+    </div>
+    <label>Bank Naam</label>
+    <input id="f_bank" placeholder="SBI">
+    <label>Location</label>
+    <input id="f_location" placeholder="Pune, Maharashtra">
+    <div class="field-grid">
+      <div><label>Auction Date</label><input id="f_date" type="date"></div>
+      <div><label>Phone (91XXXXXXXXXX)</label><input id="f_phone" placeholder="919876543210"></div>
+    </div>
+
+    <label style="margin-top:18px;padding-top:14px;border-top:1px solid var(--paper-dim);display:block;">Vehicle Ki Aur Detail</label>
+    <div class="field-grid">
+      <div><label>Model Number / Variant</label><input id="f_model" placeholder="VDI ABS BS6"></div>
+      <div><label>Owner</label>
+        <select id="f_owner">
+          <option>1st Owner</option><option>2nd Owner</option><option>3rd Owner</option><option>4th Owner+</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-grid">
+      <div><label>Registration No. (RC No.)</label><input id="f_regno" placeholder="MH12 AB 3456"></div>
+      <div><label>Fuel Type</label>
+        <select id="f_fuel">
+          <option>Petrol</option><option>Diesel</option><option>CNG</option><option>Electric</option><option>Hybrid</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-grid">
+      <div><label>KM Driven</label><input id="f_km" type="number" placeholder="68000"></div>
+      <div><label>Insurance Valid Till</label><input id="f_insurance" type="date"></div>
+    </div>
+    <div class="field-grid">
+      <div><label>Engine No.</label><input id="f_engine" placeholder="D13A5-XXXX21"></div>
+      <div><label>Chassis No.</label><input id="f_chassis" placeholder="MA3EWDE1S00XXXX2"></div>
+    </div>
+    <label>RC / Documents Status</label>
+    <input id="f_docs" placeholder="RC + Insurance available">
+
+    <label style="margin-top:18px;padding-top:14px;border-top:1px solid var(--paper-dim);display:block;">Photos (max 4, optional)</label>
+    <input id="f_images" type="file" accept="image/*" multiple onchange="handleImageUpload(event)">
+    <div id="imagePreviewRow" style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;"></div>
+    <div class="modal-actions">
+      <button class="cancel-btn" onclick="closeForm()">Cancel</button>
+      <button class="save-btn" onclick="saveListing()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, query, orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* 👉 YAHAN APNA FIREBASE CONFIG PASTE KARO — Firebase Console > Project Settings > General > "Your apps" > Web app se milega */
+const firebaseConfig = {
+  apiKey: "AIzaSyBXj3qHy45YD5UsxXxyyQhQcCSQGqge4yM",
+  authDomain: "challandetails-7e461.firebaseapp.com",
+  projectId: "challandetails-7e461",
+  storageBucket: "challandetails-7e461.firebasestorage.app",
+  messagingSenderId: "452642538357",
+  appId: "1:452642538357:web:43f9e7ceeee4ee4d94093c"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const listingsCol = collection(db, "listings");
+
+const ADMIN_PASSWORD = "Sharik@786"; // Permanent admin password
+const TODAY = new Date();
+
+const ICONS = {
+  Car: `<svg viewBox="0 0 24 24" fill="none" stroke="#EAEEEF" stroke-width="1.6"><path d="M3 13l1.5-4.5A2 2 0 0 1 6.4 7h11.2a2 2 0 0 1 1.9 1.5L21 13"/><rect x="2.5" y="13" width="19" height="5" rx="1.5"/><circle cx="7" cy="18.5" r="1.6" fill="#EAEEEF" stroke="none"/><circle cx="17" cy="18.5" r="1.6" fill="#EAEEEF" stroke="none"/></svg>`,
+  Bike: `<svg viewBox="0 0 24 24" fill="none" stroke="#EAEEEF" stroke-width="1.6"><circle cx="5.5" cy="17.5" r="3.2"/><circle cx="18.5" cy="17.5" r="3.2"/><path d="M5.5 17.5l4-8h4l3 8M9.5 9.5h4M12 6.5h3.5l2 4"/></svg>`,
+  Scooter: `<svg viewBox="0 0 24 24" fill="none" stroke="#EAEEEF" stroke-width="1.6"><circle cx="5.5" cy="17.5" r="3"/><circle cx="17.5" cy="17.5" r="3"/><path d="M5.5 17.5h6l2-6h4M13.5 6h2.5v3M9 11.5h4"/></svg>`,
+  Commercial: `<svg viewBox="0 0 24 24" fill="none" stroke="#EAEEEF" stroke-width="1.6"><path d="M2.5 8.5h11v8h-11z"/><path d="M13.5 11h4l3 3v2.5h-7z"/><circle cx="6" cy="18.5" r="1.6" fill="#EAEEEF" stroke="none"/><circle cx="16.5" cy="18.5" r="1.6" fill="#EAEEEF" stroke="none"/></svg>`
+};
+
+let listings = []; // Firestore se live sync hone wala local cache — ab yahan koi fake/demo data nahi
+let editingId = null;
+let currentImages = [];
+
+/* Firestore ke "listings" collection ko real-time sunna — jo bhi badlega (add/edit/delete), dashboard turant refresh ho jaayega */
+onSnapshot(query(listingsCol, orderBy("auctionDate")), snap => {
+  listings = snap.docs.map(d => d.data());
+  renderDashboard();
+}, err => {
+  console.error("Firestore read error:", err);
+  document.getElementById('rowList').innerHTML = `<div class="empty-state">Data load nahi ho paya.<br>Firebase config ya rules check karo.</div>`;
+});
+
+/* ---------- Image upload + compress ---------- */
+function resizeImage(file, maxW = 700, quality = 0.7){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxW / img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleImageUpload(event){
+  const files = Array.from(event.target.files).slice(0, 4 - currentImages.length);
+  for(const file of files){
+    if(currentImages.length >= 4) break;
+    try{
+      const compressed = await resizeImage(file);
+      currentImages.push(compressed);
+    }catch(e){ console.error('Image process failed', e); }
+  }
+  event.target.value = '';
+  renderImagePreviews();
+}
+
+function removeImage(idx){
+  currentImages.splice(idx, 1);
+  renderImagePreviews();
+}
+
+function renderImagePreviews(){
+  const wrap = document.getElementById('imagePreviewRow');
+  wrap.innerHTML = currentImages.map((src, i) => `
+    <div class="img-thumb">
+      <img src="${src}">
+      <button class="rm" onclick="removeImage(${i})">✕</button>
+    </div>
+  `).join('') + (currentImages.length >= 4 ? '' : `<div style="align-self:center;font-size:11px;color:var(--ink-soft);">${4-currentImages.length} aur add kar sakte ho</div>`);
+}
+
+/* ---------- Login ---------- */
+function doLogin(){
+  const val = document.getElementById('loginPass').value;
+  if(val === ADMIN_PASSWORD){
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    sessionStorage.setItem('ll_admin_session', '1');
+    renderDashboard();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+function doLogout(){
+  sessionStorage.removeItem('ll_admin_session');
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginPass').value = '';
+}
+
+/* Auto-resume session on refresh (session only, clears when tab closes) */
+window.addEventListener('load', () => {
+  if(sessionStorage.getItem('ll_admin_session') === '1'){
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    renderDashboard();
+  }
+});
+
+function daysLeft(dateStr){
+  return Math.ceil((new Date(dateStr) - TODAY) / (1000*60*60*24));
+}
+function badgeFor(days){
+  if(days <= 2) return {cls:"urgent", text: days<=0 ? "CLOSES TODAY" : days+" DAYS LEFT"};
+  if(days <= 6) return {cls:"soon", text: days+" DAYS LEFT"};
+  return {cls:"open", text: days+" DAYS LEFT"};
+}
+
+function renderDashboard(){
+  document.getElementById('statTotal').textContent = listings.length;
+  document.getElementById('statUrgent').textContent = listings.filter(l => daysLeft(l.auctionDate) <= 2).length;
+
+  const wrap = document.getElementById('rowList');
+  if(listings.length === 0){
+    wrap.innerHTML = `<div class="empty-state">Koi listing nahi hai.<br>Upar button se add karo.</div>`;
+    return;
+  }
+  wrap.innerHTML = listings.map(item => {
+    const badge = badgeFor(daysLeft(item.auctionDate));
+    const thumb = (item.images && item.images.length)
+      ? `<img class="row-thumb" src="${item.images[0]}">`
+      : `<div class="row-icon">${ICONS[item.type]}</div>`;
+    return `
+    <div class="row-card">
+      ${thumb}
+      <div class="row-info">
+        <div class="row-title">LOT #${item.id} — ${item.name}</div>
+        <div class="row-sub">${item.bank} · ${item.location} · ₹${Number(item.price).toLocaleString('en-IN')}</div>
+        <span class="row-badge ${badge.cls}">${badge.text}</span>
+      </div>
+      <div class="row-actions">
+        <button class="icon-btn edit" onclick="editListing('${item.id}')">✎</button>
+        <button class="icon-btn del" onclick="deleteListing('${item.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openForm(){
+  editingId = null;
+  currentImages = [];
+  document.getElementById('formTitle').textContent = "Nayi Listing";
+  ['f_name','f_year','f_price','f_bank','f_location','f_date','f_phone','f_model','f_regno','f_km','f_insurance','f_engine','f_chassis','f_docs'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f_type').value = 'Car';
+  document.getElementById('f_owner').value = '1st Owner';
+  document.getElementById('f_fuel').value = 'Petrol';
+  renderImagePreviews();
+  document.getElementById('formModalBg').classList.add('show');
+}
+function closeForm(){ document.getElementById('formModalBg').classList.remove('show'); }
+
+function editListing(id){
+  const item = listings.find(l => l.id === id);
+  if(!item) return;
+  editingId = id;
+  currentImages = item.images ? [...item.images] : [];
+  document.getElementById('formTitle').textContent = "Listing Edit Karo";
+  document.getElementById('f_type').value = item.type;
+  document.getElementById('f_name').value = item.name;
+  document.getElementById('f_year').value = item.year;
+  document.getElementById('f_price').value = item.price;
+  document.getElementById('f_bank').value = item.bank;
+  document.getElementById('f_location').value = item.location;
+  document.getElementById('f_date').value = item.auctionDate;
+  document.getElementById('f_phone').value = item.phone;
+  document.getElementById('f_model').value = item.modelNumber || '';
+  document.getElementById('f_owner').value = item.owner || '1st Owner';
+  document.getElementById('f_regno').value = item.regNo || '';
+  document.getElementById('f_fuel').value = item.fuelType || 'Petrol';
+  document.getElementById('f_km').value = item.kmDriven || '';
+  document.getElementById('f_insurance').value = item.insuranceValid || '';
+  document.getElementById('f_engine').value = item.engineNo || '';
+  document.getElementById('f_chassis').value = item.chassisNo || '';
+  document.getElementById('f_docs').value = item.docs || '';
+  renderImagePreviews();
+  document.getElementById('formModalBg').classList.add('show');
+}
+
+async function saveListing(){
+  const name = document.getElementById('f_name').value.trim();
+  const price = document.getElementById('f_price').value.trim();
+  const location = document.getElementById('f_location').value.trim();
+  const bank = document.getElementById('f_bank').value.trim();
+  const date = document.getElementById('f_date').value;
+  const type = document.getElementById('f_type').value;
+  const year = document.getElementById('f_year').value.trim() || new Date().getFullYear();
+  const phone = document.getElementById('f_phone').value.trim() || "919876543210";
+
+  const modelNumber = document.getElementById('f_model').value.trim();
+  const owner = document.getElementById('f_owner').value;
+  const regNo = document.getElementById('f_regno').value.trim();
+  const fuelType = document.getElementById('f_fuel').value;
+  const kmDriven = document.getElementById('f_km').value.trim();
+  const insuranceValid = document.getElementById('f_insurance').value;
+  const engineNo = document.getElementById('f_engine').value.trim();
+  const chassisNo = document.getElementById('f_chassis').value.trim();
+  const docs = document.getElementById('f_docs').value.trim();
+
+  if(!name || !price || !location || !bank || !date){
+    alert('Kripya sabhi zaroori fields bharo (naam, price, location, bank, date)');
+    return;
+  }
+
+  const id = editingId || String(1000 + listings.length + Math.floor(Math.random()*900)).padStart(4,'0');
+  const data = { id, type, name, year, price, bank, location, auctionDate:date, phone, modelNumber, owner, regNo, fuelType, kmDriven, insuranceValid, engineNo, chassisNo, docs, images:[...currentImages] };
+
+  try{
+    await setDoc(doc(listingsCol, id), data);
+    closeForm();
+  }catch(e){
+    console.error('Save failed', e);
+    alert('Save nahi ho paya. Firebase config/rules check karo (console mein error dekho).');
+  }
+}
+
+async function deleteListing(id){
+  if(!confirm('Ye listing delete karni hai?')) return;
+  try{
+    await deleteDoc(doc(listingsCol, id));
+  }catch(e){
+    console.error('Delete failed', e);
+    alert('Delete nahi ho paya. Firebase config/rules check karo.');
+  }
+}
+
+/* Module script ke andar declare functions global window par nahi jaate — inline onclick ke liye expose karna zaroori hai */
+window.doLogin = doLogin;
+window.doLogout = doLogout;
+window.openForm = openForm;
+window.closeForm = closeForm;
+window.editListing = editListing;
+window.deleteListing = deleteListing;
+window.saveListing = saveListing;
+window.handleImageUpload = handleImageUpload;
+window.removeImage = removeImage;
+</script>
+</body>
+</html>
