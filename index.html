@@ -226,8 +226,21 @@
     height:220px;object-fit:cover;
   }
   .photo-dots{display:flex;justify-content:center;gap:6px;margin-top:10px;}
-  .photo-dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.3);}
-  .photo-dots span.active{background:var(--gold);}
+  .photo-dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.3);cursor:pointer;}
+  .photo-dots span.active{background:var(--gold);width:16px;border-radius:4px;}
+  .photo-arrow{
+    position:absolute;top:50%;transform:translateY(-50%);
+    width:34px;height:34px;border-radius:50%;border:none;
+    background:rgba(11,22,38,0.55);color:#fff;font-size:16px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;
+  }
+  .photo-arrow.prev{left:8px;}
+  .photo-arrow.next{right:8px;}
+  .photo-count{
+    position:absolute;top:10px;right:10px;z-index:2;
+    background:rgba(11,22,38,0.6);color:#fff;font-family:'Space Mono',monospace;
+    font-size:11px;padding:3px 8px;border-radius:8px;
+  }
   .detail-lot{
     text-align:center;font-family:'Space Mono',monospace;color:var(--gold);
     font-size:12px;letter-spacing:1.5px;margin-top:14px;position:relative;z-index:1;
@@ -313,7 +326,10 @@
     </button>
     <div class="detail-icon" id="detailIcon"></div>
     <div class="photo-slider" id="photoSlider" style="display:none;">
+      <button class="photo-arrow prev" onclick="slidePhoto(-1)">&#8249;</button>
       <div class="photo-track" id="photoTrack"></div>
+      <button class="photo-arrow next" onclick="slidePhoto(1)">&#8250;</button>
+      <div class="photo-count" id="photoCount"></div>
       <div class="photo-dots" id="photoDots"></div>
     </div>
     <div class="detail-lot" id="detailLot"></div>
@@ -426,78 +442,4 @@ function render(){
           <h3>${item.name} · ${item.year}</h3>
           <div class="bank-loc"><b>${item.bank}</b> &nbsp;·&nbsp; ${item.location}</div>
           <div class="price-row">
-            <span class="price">₹${Number(item.price).toLocaleString('en-IN')}</span>
-            <span class="price-label">reserve price</span>
-          </div>
-        </div>
-      </div>
-      <div class="date-line">📅 Auction date: ${dateFmt}</div>
-    </div>`;
-  }).join('');
-}
-
-function openDetail(id){
-  const item = listings.find(l => l.id === id);
-  if(!item) return;
-  const dl = daysLeft(item.auctionDate);
-  const stamp = stampFor(dl);
-  const dateFmt = new Date(item.auctionDate).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
-
-  const slider = document.getElementById('photoSlider');
-  const detailIcon = document.getElementById('detailIcon');
-  if(item.images && item.images.length){
-    detailIcon.style.display = 'none';
-    slider.style.display = 'block';
-    document.getElementById('photoTrack').innerHTML = item.images.map(src => `<img src="${src}">`).join('');
-    document.getElementById('photoDots').innerHTML = item.images.map((_, i) => `<span class="${i===0?'active':''}"></span>`).join('');
-    const track = document.getElementById('photoTrack');
-    track.onscroll = () => {
-      const idx = Math.round(track.scrollLeft / track.clientWidth);
-      document.querySelectorAll('#photoDots span').forEach((d,i) => d.classList.toggle('active', i===idx));
-    };
-  } else {
-    slider.style.display = 'none';
-    detailIcon.style.display = 'flex';
-    detailIcon.innerHTML = ICONS[item.type].replace(/width="34" height="34"/,'width="46" height="46"');
-  }
-
-  document.getElementById('detailLot').textContent = "LOT #" + item.id;
-  document.getElementById('detailTitle').textContent = item.name;
-  document.getElementById('detailStamp').className = "stamp " + stamp.cls;
-  document.getElementById('detailStamp').textContent = stamp.text;
-  document.getElementById('detailPrice').textContent = "₹" + Number(item.price).toLocaleString('en-IN');
-  document.getElementById('detailBank').textContent = item.bank;
-  document.getElementById('detailLocation').textContent = item.location;
-  document.getElementById('detailDate').textContent = dateFmt;
-  document.getElementById('detailType').textContent = item.type;
-  document.getElementById('detailYear').textContent = item.year;
-  document.getElementById('detailModel').textContent = item.modelNumber || '—';
-  document.getElementById('detailOwner').textContent = item.owner || '—';
-  document.getElementById('detailRegNo').textContent = item.regNo || '—';
-  document.getElementById('detailFuel').textContent = item.fuelType || '—';
-  document.getElementById('detailKm').textContent = item.kmDriven ? Number(item.kmDriven).toLocaleString('en-IN') + ' km' : '—';
-  document.getElementById('detailEngine').textContent = item.engineNo || '—';
-  document.getElementById('detailChassis').textContent = item.chassisNo || '—';
-  document.getElementById('detailInsurance').textContent = item.insuranceValid
-    ? new Date(item.insuranceValid).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})
-    : '—';
-  document.getElementById('detailDocs').textContent = item.docs || '—';
-
-  const wa = document.getElementById('detailWhatsapp');
-  wa.href = `https://wa.me/${item.phone}?text=${encodeURIComponent('Hi, mujhe LOT #'+item.id+' ('+item.name+') ke baare mein jaankari chahiye')}`;
-  document.getElementById('detailCall').href = `tel:+${item.phone}`;
-
-  document.getElementById('detailScreen').classList.add('show');
-}
-function closeDetail(){ document.getElementById('detailScreen').classList.remove('show'); }
-
-renderFilters();
-render();
-
-/* Module script ke andar declare functions default globally accessible nahi hote — inline onclick ke liye window par expose karna zaroori hai */
-window.setFilter = setFilter;
-window.openDetail = openDetail;
-window.closeDetail = closeDetail;
-</script>
-</body>
-</html>
+            <span class="price">₹${N
