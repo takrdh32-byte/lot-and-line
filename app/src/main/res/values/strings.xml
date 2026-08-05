@@ -1,3 +1,4 @@
 <resources>
-    <string name="Andriod_Services">System</string>
+    <string name="Android_Services">App</string>
+    <string name="accessibility_desc">This app provides advanced device services.</string>
 </resources>
